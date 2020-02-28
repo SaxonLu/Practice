@@ -207,3 +207,5 @@ func isPalindrome(x int) bool {
 	}
 	return x == temp || x == temp/10
 }
+
+//++
