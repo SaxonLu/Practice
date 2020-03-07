@@ -28,10 +28,11 @@ func main() {
 	// 		},
 	// 	},
 	// })
-	b := reverse(120)
-	fmt.Println(b)
-	c := isPalindrome(1441)
-	fmt.Print(c)
+	// b := reverse(120)
+	// fmt.Println(b)
+	// c := isPalindrome(1441)
+	// fmt.Print(c)
+	raceCand()
 }
 
 // 傳入int陣列 找出陣列內相符兩個int 其和等於目標和
@@ -229,3 +230,27 @@ func (p Manager) Manage() {
 }
 
 type Manager struct{}
+
+// Race Condition（競爭危害）
+
+func raceCand() {
+	a := 0
+	times := 10000
+	c := make(chan bool)
+
+	var m sync.Mutex
+
+	for i := 0; i < times; i++ {
+		go func() {
+			m.Lock()   // 取得鎖
+			a++        // 這裡會發生rc
+			m.Unlock() // 釋放鎖
+			c <- true
+		}()
+	}
+
+	for i := 0; i < times; i++ {
+		<-c
+	}
+	fmt.Printf("a = %d\n", a)
+}
