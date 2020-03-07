@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 func main() {
 
@@ -206,6 +209,23 @@ func isPalindrome(x int) bool {
 		x /= 10
 	}
 	return x == temp || x == temp/10
+
 }
 
-//++
+/// 單例模式 練習
+
+var m *Manager
+var once *sync.Once
+
+func GetInstance() *Manager {
+	once.Do(func() {
+		m = &Manager{}
+	})
+	return m
+}
+
+func (p Manager) Manage() {
+	fmt.Println("Call Manage")
+}
+
+type Manager struct{}
