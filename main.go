@@ -32,7 +32,24 @@ func main() {
 	// fmt.Println(b)
 	// c := isPalindrome(1441)
 	// fmt.Print(c)
-	raceCand()
+	// GetInstance()
+
+	// foo := addByShareMemory(10)
+	// fmt.Println(len(foo))
+	// fmt.Println(foo)
+
+	// fooNext := addByShareMemoryLock(10)
+	// fmt.Println(len(fooNext))
+	// fmt.Println(fooNext)
+
+	// fooChannel := addByShareMemoryChannel(10)
+	// fmt.Println(len(fooChannel))
+	// fmt.Println(fooChannel)
+
+	z, x := funChannel(5)
+	fmt.Println(z)
+	fmt.Println(x)
+
 }
 
 // 傳入int陣列 找出陣列內相符兩個int 其和等於目標和
@@ -221,6 +238,7 @@ var once *sync.Once
 func GetInstance() *Manager {
 	once.Do(func() {
 		m = &Manager{}
+		m.Manage()
 	})
 	return m
 }
@@ -253,4 +271,78 @@ func raceCand() {
 		<-c
 	}
 	fmt.Printf("a = %d\n", a)
+}
+
+func addByShareMemory(n int) []int {
+	var ints []int
+	var wg sync.WaitGroup
+
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			defer wg.Done()
+			ints = append(ints, i)
+		}(i)
+	}
+
+	wg.Wait()
+	return ints
+}
+
+func addByShareMemoryLock(n int) []int {
+	var ints []int
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			defer wg.Done()
+			mu.Lock()
+			ints = append(ints, i)
+			mu.Unlock()
+		}(i)
+	}
+
+	wg.Wait()
+	return ints
+}
+
+func addByShareMemoryChannel(n int) []int {
+	var ints []int
+	channel := make(chan int, n)
+
+	for i := 0; i < n; i++ {
+		go func(channel chan<- int, order int) {
+			channel <- order
+		}(channel, i)
+	}
+
+	for i := range channel {
+		ints = append(ints, i)
+		if len(ints) == n {
+			break
+		}
+
+	}
+	close(channel)
+	return ints
+}
+
+func funChannel(n int) (iwi []int, awa []string) {
+	Intchannel := make(chan int, n)
+	for i := 0; i < n; i++ {
+		go func(Intchannel chan<- int, order int) {
+			Intchannel <- order
+		}(Intchannel, i)
+
+	}
+	for u := range Intchannel {
+		iwi = append(iwi, u)
+		if len(iwi) == n {
+			break
+		}
+	}
+	close(Intchannel)
+	return
 }
